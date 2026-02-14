@@ -38,7 +38,11 @@ try:
 except Exception:
     _WEASYPRINT_AVAILABLE = False
 
-DATABASE_PATH = os.path.join(os.path.dirname(__file__), "landscaping.db")
+if os.getenv("VERCEL"):
+    # Vercel functions can only write to /tmp at runtime.
+    DATABASE_PATH = "/tmp/landscaping.db"
+else:
+    DATABASE_PATH = os.path.join(os.path.dirname(__file__), "landscaping.db")
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "").strip()
 
 
