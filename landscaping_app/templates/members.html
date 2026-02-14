@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Members - Landscaping App{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Members</h1>
+    <a href="/members/new" class="btn btn-primary">Add Member</a>
+</div>
+{% if members %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
+            <tr>
+                <td><a href="/members/{{ member.id }}">{{ member.name }}</a></td>
+                <td>
+                    <a href="/members/{{ member.id }}" class="btn btn-sm btn-outline-secondary">View</a>
+                    <a href="/members/{{ member.id }}/edit" class="btn btn-sm btn-outline-primary ms-2">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No members yet. <a href="/members/new">Add your first member.</a></p>
+{% endif %}
+{% endblock %}

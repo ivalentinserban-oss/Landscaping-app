@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Crews - Landscaping App{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Crews</h1>
+    <a href="/crews/new" class="btn btn-primary">Add Crew</a>
+</div>
+{% if crews %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for crew in crews %}
+            <tr>
+                <td><a href="/crews/{{ crew.id }}">{{ crew.name }}</a></td>
+                <td>
+                    <a href="/crews/{{ crew.id }}" class="btn btn-sm btn-outline-secondary">View</a>
+                    <a href="/crews/{{ crew.id }}/edit" class="btn btn-sm btn-outline-primary ms-2">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No crews yet. <a href="/crews/new">Add your first crew.</a></p>
+{% endif %}
+{% endblock %}

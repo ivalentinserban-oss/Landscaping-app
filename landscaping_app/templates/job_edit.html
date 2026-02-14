@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Edit Job #{{ job.id }} - Landscaping App{% endblock %}
+{% block content %}
+<h1 class="mb-3">Edit Job #{{ job.id }}</h1>
+<form method="post" action="/jobs/{{ job.id }}/edit">
+    <div class="mb-3">
+        <label for="client_id" class="form-label">Client</label>
+        <select class="form-select" id="client_id" name="client_id" required>
+            {% for c in clients %}
+            <option value="{{ c.id }}" {% if c.id == job.client_id %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3" required>{{ job.description }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label for="scheduled_date" class="form-label">Scheduled Date &amp; Time</label>
+        <input type="datetime-local" class="form-control" id="scheduled_date" name="scheduled_date" value="{{ job.scheduled_date.replace(' ', 'T')[:16] }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="crew_id" class="form-label">Crew</label>
+        <select class="form-select" id="crew_id" name="crew_id">
+            <option value="">No crew</option>
+            {% for c in crews %}
+            <option value="{{ c.id }}" {% if job.crew_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="crew" class="form-label">Crew notes (optional)</label>
+        <input type="text" class="form-control" id="crew" name="crew" value="{{ job.crew or '' }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Assign members</label>
+        <div class="member-checkboxes">
+            {% for m in members %}
+            <label class="d-block mb-1"><input type="checkbox" name="member_ids" value="{{ m.id }}" {% if m.id in job_member_ids %}checked{% endif %}> {{ m.name }}</label>
+            {% endfor %}
+            {% if not members %}
+            <p class="text-muted mb-0">No members yet. <a href="/members/new">Add members</a> to assign to jobs.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="estimated_hours" class="form-label">Estimated Hours</label>
+        <input type="number" step="0.25" class="form-control" id="estimated_hours" name="estimated_hours" value="{{ job.estimated_hours }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="estimated_cost" class="form-label">Estimated Cost ($)</label>
+        <input type="number" step="0.01" class="form-control" id="estimated_cost" name="estimated_cost" value="{{ job.estimated_cost }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="/jobs/{{ job.id }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

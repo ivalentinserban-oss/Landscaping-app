@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Job {{ job.id }} - Landscaping App{% endblock %}
+{% block head_extra %}
+<style>
+    .map-frame {
+        width: 100%;
+        height: 300px;
+        border-radius: 12px;
+        border: 1px solid #d7e0d8;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Job #{{ job.id }} Details</h1>
+    {% if job.status != 'Completed' %}
+    <a href="/jobs/{{ job.id }}/edit" class="btn btn-outline-primary">Edit Job</a>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Job Information</div>
+            <div class="card-body">
+                <p><strong>Description:</strong> {{ job.description }}</p>
+                <p><strong>Scheduled Date:</strong> {{ job.scheduled_date.replace('T', ' ') }}</p>
+                <p><strong>Crew:</strong> {{ job.crew_name or job.crew or '—' }}</p>
+                {% if job.crew and job.crew_name %}<p><strong>Crew notes:</strong> {{ job.crew }}</p>{% elif job.crew %}<p><strong>Crew notes:</strong> {{ job.crew }}</p>{% endif %}
+                {% if job_members %}
+                <p><strong>Members:</strong> {% for m in job_members %}{{ m.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+                {% endif %}
+                <p><strong>Status:</strong> {{ job.status }}</p>
+                {% if job.on_my_way_sent_at %}
+                <p><strong>Customer notified (On my way):</strong> {{ job.on_my_way_sent_at[:16] }} UTC</p>
+                {% endif %}
+                <p><strong>Estimated Hours:</strong> {{ job.estimated_hours }}</p>
+                <p><strong>Estimated Cost:</strong> ${{ '%.2f'|format(job.estimated_cost) }}</p>
+                {% if job.status == 'Completed' %}
+                    <p><strong>Actual Hours:</strong> {{ job.actual_hours }}</p>
+                    <p><strong>Actual Cost:</strong> ${{ '%.2f'|format(job.actual_cost) }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">Client Information</div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ job.client_name }}</p>
+                <p><strong>Address:</strong> {{ job.client_address or '—' }}</p>
+                <p><strong>Phone:</strong> {{ job.client_phone or '—' }}</p>
+                <p><strong>Email:</strong> {{ job.client_email or '—' }}</p>
+            </div>
+        </div>
+        {% if job.status != 'Completed' %}
+        {% if not job.on_my_way_sent_at %}
+        <div class="card mb-3">
+            <div class="card-header">Customer Notification</div>
+            <div class="card-body">
+                <form method="post" action="/jobs/{{ job.id }}/notify_customer">
+                    <button type="submit" class="btn btn-outline-primary">Notify customer (On my way)</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        <div class="card mb-3">
+            <div class="card-header">Update Status</div>
+            <div class="card-body">
+                <form method="post" action="/jobs/{{ job.id }}/update_status">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="Scheduled" {% if job.status == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+                            <option value="In progress" {% if job.status == 'In progress' %}selected{% endif %}>In progress</option>
+                            <option value="Completed" {% if job.status == 'Completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">Complete Job</div>
+            <div class="card-body">
+                <form method="post" action="/jobs/{{ job.id }}/complete">
+                    <div class="mb-3">
+                        <label for="actual_hours" class="form-label">Actual Hours</label>
+                        <input type="number" step="0.25" class="form-control" id="actual_hours" name="actual_hours" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="actual_cost" class="form-label">Actual Cost ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="actual_cost" name="actual_cost" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Mark as Completed</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="mb-3">
+            {% if job.invoice_status == 'Paid' %}
+            <span class="btn btn-success disabled me-2">Invoice Paid</span>
+            {% elif job.invoice_status == 'Sent' %}
+            <span class="btn btn-outline-primary disabled me-2">Invoice Sent</span>
+            {% else %}
+            <span class="btn btn-outline-secondary disabled me-2">Invoice not sent</span>
+            {% endif %}
+            <a href="/jobs/{{ job.id }}/invoice" class="btn btn-success">View Invoice</a>
+            {% if weasyprint %}
+            <a href="/jobs/{{ job.id }}/invoice.pdf" class="btn btn-outline-secondary ms-2">Download PDF</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Tasks</div>
+            <div class="card-body">
+                {% if tasks %}
+                <ul class="list-group mb-3">
+                    {% for task in tasks %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="{{ 'text-decoration-line-through' if task.completed else '' }}">{{ task.description }}</span>
+                        <form method="post" action="/tasks/{{ task.id }}/toggle" style="margin:0;">
+                            <button type="submit" class="btn btn-sm {{ 'btn-success' if task.completed else 'btn-outline-success' }}">
+                                {% if task.completed %}✔{% else %}Mark Done{% endif %}
+                            </button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No tasks yet.</p>
+                {% endif %}
+                <form method="post" action="/jobs/{{ job.id }}/add_task">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="description" placeholder="New task description" required>
+                        <button class="btn btn-outline-primary" type="submit">Add Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">Location</div>
+            <div class="card-body">
+                {% if job.client_address %}
+                <iframe
+                    class="map-frame"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    src="https://www.google.com/maps?q={{ job.client_address|replace(' ', '+') }}&output=embed"
+                    title="Job location map"
+                ></iframe>
+                <p class="mb-0 mt-4">
+                    <a
+                        href="https://www.google.com/maps/search/?api=1&query={{ job.client_address|replace(' ', '+') }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open in Google Maps
+                    </a>
+                </p>
+                {% else %}
+                <p class="mb-0">No client address available for mapping.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

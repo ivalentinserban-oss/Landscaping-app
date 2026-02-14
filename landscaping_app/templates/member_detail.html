@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ member.name }} - Landscaping App{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>{{ member.name }}</h1>
+    <div>
+        <a href="/members/{{ member.id }}/edit" class="btn btn-primary">Edit</a>
+        <form method="post" action="/members/{{ member.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete this member?');">
+            <button type="submit" class="btn btn-secondary ms-2">Delete</button>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">Jobs assigned to this member</div>
+    <div class="card-body">
+        {% if jobs %}
+        <table class="table table-striped table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Scheduled</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr>
+                    <td>{{ job.description[:50] }}{% if job.description|length > 50 %}…{% endif %}</td>
+                    <td>{{ job.scheduled_date[:10] if job.scheduled_date else '—' }}</td>
+                    <td>{{ job.status }}</td>
+                    <td><a href="/jobs/{{ job.id }}" class="btn btn-sm btn-outline-secondary">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="mb-0">No jobs assigned to this member.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Jobs - Landscaping App{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Jobs</h1>
+    <div>
+        <a href="/jobs/calendar" class="btn btn-outline-secondary me-2">Calendar</a>
+        <a href="/jobs/new" class="btn btn-primary">Add Job</a>
+    </div>
+</div>
+{% if jobs %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Client</th>
+                <th>Description</th>
+                <th>Scheduled Date</th>
+                <th>Crew</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.id }}</td>
+                <td>{{ job.client_name }}</td>
+                <td>{{ job.description }}</td>
+                <td>{{ job.scheduled_date[:10] }}</td>
+                <td>{{ job.crew }}</td>
+                <td>{{ job.status }}</td>
+                <td>
+                    <a href="/jobs/{{ job.id }}" class="btn btn-sm btn-outline-secondary">View</a>
+                    {% if job.status != 'Completed' %}
+                    <a href="/jobs/{{ job.id }}/edit" class="btn btn-sm btn-outline-primary ms-2">Edit</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No jobs found. <a href="/jobs/new">Create your first job.</a></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ crew.name }} - Landscaping App{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>{{ crew.name }}</h1>
+    <div>
+        <a href="/crews/{{ crew.id }}/edit" class="btn btn-primary">Edit</a>
+        <form method="post" action="/crews/{{ crew.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete this crew?');">
+            <button type="submit" class="btn btn-secondary ms-2">Delete</button>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">Jobs assigned to this crew</div>
+    <div class="card-body">
+        {% if jobs %}
+        <table class="table table-striped table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Scheduled</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr>
+                    <td>{{ job.description[:50] }}{% if job.description|length > 50 %}…{% endif %}</td>
+                    <td>{{ job.scheduled_date[:10] if job.scheduled_date else '—' }}</td>
+                    <td>{{ job.status }}</td>
+                    <td><a href="/jobs/{{ job.id }}" class="btn btn-sm btn-outline-secondary">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="mb-0">No jobs assigned to this crew.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

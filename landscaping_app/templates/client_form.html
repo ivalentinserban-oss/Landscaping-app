@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Add Client - Landscaping App{% endblock %}
+{% block head_extra %}
+<style>
+    .autocomplete-wrap {
+        position: relative;
+    }
+    .address-suggestions {
+        position: absolute;
+        z-index: 20;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: 4px 0;
+        list-style: none;
+        background: #fff;
+        border: 1px solid #d7e0d8;
+        border-radius: 10px;
+        box-shadow: 0 10px 24px rgba(31, 42, 36, 0.14);
+        max-height: 220px;
+        overflow-y: auto;
+    }
+    .address-suggestions li {
+        padding: 9px 11px;
+        cursor: pointer;
+    }
+    .address-suggestions li:hover {
+        background: #edf5ee;
+    }
+    .help-text {
+        display: block;
+        margin-top: 6px;
+        color: #5f6f64;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<h1 class="mb-3">Add Client</h1>
+<form method="post" action="/clients/new">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label for="address" class="form-label">Address</label>
+        <div class="autocomplete-wrap">
+            <input type="text" class="form-control" id="address" name="address" autocomplete="off">
+            <ul id="address-suggestions" class="address-suggestions" hidden></ul>
+        </div>
+        <small id="address-help" class="help-text">
+            {% if google_maps_api_key %}
+            Address suggestions powered by Google Maps (fallback enabled).
+            {% else %}
+            Address suggestions enabled (fallback mode).
+            {% endif %}
+        </small>
+    </div>
+    <div class="mb-3">
+        <label for="phone" class="form-label">Phone</label>
+        <input type="tel" class="form-control" id="phone" name="phone">
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email">
+    </div>
+    <button type="submit" class="btn btn-primary">Add Client</button>
+    <a href="/clients" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
+{% block body_extra %}
+<script>
+    let fallbackEnabled = false;
+    let pendingController = null;
+    let debounceTimer = null;
+
+    function escapeHtml(value) {
+        return value
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function clearSuggestions() {
+        const list = document.getElementById("address-suggestions");
+        if (!list) return;
+        list.innerHTML = "";
+        list.hidden = true;
+    }
+
+    function renderSuggestions(items) {
+        const list = document.getElementById("address-suggestions");
+        const input = document.getElementById("address");
+        if (!list || !input) return;
+        if (!items.length) {
+            clearSuggestions();
+            return;
+        }
+        list.innerHTML = items
+            .map(function(item) {
+                return '<li data-address="' + escapeHtml(item) + '">' + escapeHtml(item) + "</li>";
+            })
+            .join("");
+        list.hidden = false;
+        Array.from(list.querySelectorAll("li")).forEach(function(li) {
+            li.addEventListener("click", function() {
+                input.value = li.getAttribute("data-address");
+                clearSuggestions();
+            });
+        });
+    }
+
+    async function fetchFallbackSuggestions(query) {
+        if (pendingController) {
+            pendingController.abort();
+        }
+        pendingController = new AbortController();
+        const url = "https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=" + encodeURIComponent(query);
+        const response = await fetch(url, {
+            signal: pendingController.signal,
+            headers: { "Accept": "application/json" }
+        });
+        if (!response.ok) {
+            return [];
+        }
+        const data = await response.json();
+        return data.map(function(row) { return row.display_name; });
+    }
+
+    function enableFallbackAutocomplete() {
+        if (fallbackEnabled) return;
+        fallbackEnabled = true;
+        const input = document.getElementById("address");
+        const help = document.getElementById("address-help");
+        if (!input) return;
+        if (help) {
+            help.textContent = "Using fallback address suggestions.";
+        }
+        input.addEventListener("input", function() {
+            const query = input.value.trim();
+            clearTimeout(debounceTimer);
+            if (query.length < 3) {
+                clearSuggestions();
+                return;
+            }
+            debounceTimer = setTimeout(async function() {
+                try {
+                    const items = await fetchFallbackSuggestions(query);
+                    renderSuggestions(items);
+                } catch (_) {
+                    clearSuggestions();
+                }
+            }, 250);
+        });
+        input.addEventListener("blur", function() {
+            setTimeout(clearSuggestions, 120);
+        });
+    }
+
+    function initAddressAutocomplete() {
+        const addressInput = document.getElementById("address");
+        if (!addressInput) {
+            return;
+        }
+        try {
+            const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+                fields: ["formatted_address", "geometry", "name"],
+                types: ["address"]
+            });
+            autocomplete.addListener("place_changed", function() {
+                const place = autocomplete.getPlace();
+                if (place && place.formatted_address) {
+                    addressInput.value = place.formatted_address;
+                }
+            });
+        } catch (_) {
+            enableFallbackAutocomplete();
+        }
+    }
+
+    function googleMapsLoadError() {
+        enableFallbackAutocomplete();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if not google_maps_api_key %}
+        enableFallbackAutocomplete();
+        {% endif %}
+    });
+</script>
+{% if google_maps_api_key %}
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initAddressAutocomplete"></script>
+{% endif %}
+{% if google_maps_api_key %}
+<script>
+    window.addEventListener("error", function(event) {
+        const target = event.target;
+        if (target && target.tagName === "SCRIPT" && target.src && target.src.includes("maps.googleapis.com/maps/api/js")) {
+            googleMapsLoadError();
+        }
+    }, true);
+</script>
+{% endif %}
+{% endblock %}

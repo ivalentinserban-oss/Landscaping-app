@@ -1,0 +1,26 @@
+HOW TO RUN THE LANDSCAPING APP
+==============================
+
+1. Open Command Prompt or PowerShell.
+
+2. Go to this folder:
+   cd c:\Users\User\Desktop\landscaping_app\landscaping_app
+
+3. Start the server (keep this window open):
+   python app.py
+   (Or double-click run.bat from that folder.)
+
+4. When you see "Uvicorn running on http://0.0.0.0:5050", open your browser.
+
+5. In the browser address bar type exactly (no https, no trailing slash needed):
+   http://localhost:5050
+
+   Or try:
+   http://127.0.0.1:5050
+
+If you see "This site can't be reached":
+- Make sure the server is still running (the terminal window is open and shows "Uvicorn running").
+- Use http:// not https://
+- Use port 5050 in the URL.
+- Try temporarily turning off VPN if you use one.
+- Try a different browser (Chrome, Edge, Firefox).

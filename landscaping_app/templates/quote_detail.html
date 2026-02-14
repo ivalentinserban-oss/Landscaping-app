@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Quote #{{ quote.id }} - Landscaping App{% endblock %}
+{% block content %}
+<h1 class="mb-3">Quote #{{ quote.id }}</h1>
+<div class="card mb-3">
+    <div class="card-header">Status: {{ quote.status }}</div>
+    <div class="card-body">
+        <p><strong>Client:</strong> {{ quote.client_name }}</p>
+        <p><strong>Description:</strong> {{ quote.description }}</p>
+        <p><strong>Estimated Hours:</strong> {{ quote.estimated_hours }}</p>
+        <p><strong>Estimated Cost:</strong> ${{ '%.2f'|format(quote.estimated_cost) }}</p>
+        <p><strong>Created:</strong> {{ quote.created_at[:10] if quote.created_at else '—' }}</p>
+        {% if quote.valid_until %}<p><strong>Valid Until:</strong> {{ quote.valid_until }}</p>{% endif %}
+        {% if quote.job_id %}
+        <p><strong>Accepted as Job:</strong> <a href="/jobs/{{ quote.job_id }}">Job #{{ quote.job_id }}</a></p>
+        {% endif %}
+    </div>
+</div>
+<div class="mb-3">
+    <a href="/quotes" class="btn btn-secondary">Back to Quotes</a>
+    {% if quote.status == 'Draft' %}
+    <form method="post" action="/quotes/{{ quote.id }}/send" style="display:inline;" class="ms-2">
+        <button type="submit" class="btn btn-outline-primary">Mark as Sent</button>
+    </form>
+    {% endif %}
+    {% if quote.status in ['Draft', 'Sent'] %}
+    <form method="post" action="/quotes/{{ quote.id }}/accept" style="display:inline;" class="ms-2">
+        <button type="submit" class="btn btn-success">Accept (Create Job)</button>
+    </form>
+    <form method="post" action="/quotes/{{ quote.id }}/decline" style="display:inline;" onsubmit="return confirm('Mark this quote as declined?');">
+        <button type="submit" class="btn btn-outline-secondary ms-2">Decline</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

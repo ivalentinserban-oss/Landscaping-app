@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Home - Landscaping App{% endblock %}
+{% block head_extra %}
+<style>
+    .dashboard-row .col-md-4 { display: flex; }
+    .dashboard-row .card { flex: 1; display: flex; flex-direction: column; }
+    .dashboard-row .card-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .dashboard-row .card-body.text-center { align-items: center; }
+    .dashboard-row .card-body .display-4 { margin-bottom: 0.25rem; }
+    .dashboard-row .card-body .mt-2 { margin-top: 0.5rem; }
+</style>
+{% endblock %}
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+<div class="row dashboard-row">
+    <div class="col-md-4 mb-3">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <h5 class="card-title">Clients</h5>
+                <p class="display-4 fw-bold">{{ client_count }}</p>
+                <a href="/clients" class="btn btn-primary">View Clients</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <h5 class="card-title">Scheduled Jobs</h5>
+                <p class="display-4 fw-bold">{{ scheduled_count }}</p>
+                <a href="/jobs" class="btn btn-warning">View Jobs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <h5 class="card-title">Completed Jobs</h5>
+                <p class="display-4 fw-bold">{{ completed_count }}</p>
+                <a href="/jobs" class="btn btn-success">View Jobs</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3 dashboard-row">
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-header">Revenue (this month)</div>
+            <div class="card-body text-center">
+                <p class="display-4 fw-bold">${{ '%.2f'|format(revenue_this_month) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-header">Revenue (this year)</div>
+            <div class="card-body text-center">
+                <p class="display-4 fw-bold">${{ '%.2f'|format(revenue_this_year) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-header">Unpaid Invoices</div>
+            <div class="card-body text-center d-flex flex-column align-items-center justify-content-center">
+                <p class="display-4 fw-bold mb-1">{{ unpaid_count }}</p>
+                <p class="mb-2">${{ '%.2f'|format(unpaid_total) }} due</p>
+                <a href="/reports#unpaid" class="btn btn-outline-secondary">View</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3 dashboard-row">
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header">Quotes</div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Sent:</strong> {{ quotes_sent }}</p>
+                <p class="mb-0"><strong>Accepted:</strong> {{ quotes_accepted }}</p>
+                <a href="/quotes" class="btn btn-outline-primary mt-2">View Quotes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header">Reports</div>
+            <div class="card-body">
+                <a href="/reports" class="btn btn-primary">View Reports</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

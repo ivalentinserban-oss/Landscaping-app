@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Clients - Landscaping App{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Clients</h1>
+    <a href="/clients/new" class="btn btn-primary">Add Client</a>
+</div>
+{% if clients %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td><a href="/clients/{{ client.id }}">{{ client.name }}</a></td>
+                <td>{{ client.address }}</td>
+                <td>{{ client.phone }}</td>
+                <td>{{ client.email }}</td>
+                <td>
+                    <a href="/clients/{{ client.id }}" class="btn btn-sm btn-outline-secondary">View</a>
+                    <a href="/clients/{{ client.id }}/edit" class="btn btn-sm btn-outline-primary ms-2">Edit</a>
+                    <form method="post" action="/clients/{{ client.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete this client? This will fail if they have any jobs.');">
+                        <button type="submit" class="btn btn-sm btn-secondary ms-2">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No clients found. <a href="/clients/new">Create your first client.</a></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Edit Crew - Landscaping App{% endblock %}
+{% block content %}
+<h1 class="mb-3">Edit Crew</h1>
+<form method="post" action="/crews/{{ crew.id }}/edit">
+    <div class="mb-3">
+        <label for="name" class="form-label">Crew Name</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ crew.name }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="/crews/{{ crew.id }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
