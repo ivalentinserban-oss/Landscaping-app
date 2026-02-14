@@ -7,6 +7,7 @@
     .cal-table th { background: #f0f5f0; font-size: 0.85rem; }
     .cal-day { min-height: 90px; }
     .cal-day-num { font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .cal-day-total { font-size: 0.75rem; margin-bottom: 6px; }
     .cal-job { font-size: 0.8rem; margin-bottom: 4px; }
     .cal-job a { display: block; padding: 2px 6px; background: #e8f3ed; border-radius: 6px; color: inherit; text-decoration: none; }
     .cal-job a:hover { background: var(--primary); color: #fff; }
@@ -43,7 +44,11 @@
                 {% if day %}
                 <div class="cal-day-num">{{ day }}</div>
                 {% set date_key = '%04d-%02d-%02d'|format(year, month, day) %}
-                {% for job in jobs_by_date.get(date_key, []) %}
+                {% set day_jobs = jobs_by_date.get(date_key, []) %}
+                {% if day_jobs %}
+                <div class="cal-day-total text-muted small mb-1">{{ day_jobs|length }} job{{ 's' if day_jobs|length != 1 else '' }}</div>
+                {% endif %}
+                {% for job in day_jobs %}
                 <div class="cal-job">
                     <a href="/jobs/{{ job.id }}" title="{{ job.client_name }}">{{ job.description[:25] }}{% if job.description|length > 25 %}…{% endif %}</a>
                 </div>
