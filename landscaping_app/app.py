@@ -816,12 +816,12 @@ def new_job_form(request: Request) -> HTMLResponse:
 
 @app.post("/jobs/new")
 def create_job(
-    request: Request,
     client_id: int = Form(...),
     description: str = Form(...),
     scheduled_date: str = Form(...),
     crew: str = Form(""),
     crew_id: Optional[int] = Form(None),
+    member_ids: Optional[List[int]] = Form(None),
     estimated_hours: float = Form(...),
     estimated_cost: float = Form(...),
 ) -> RedirectResponse:
@@ -830,7 +830,7 @@ def create_job(
         dt = datetime.fromisoformat(scheduled_date)
     except ValueError as err:
         raise HTTPException(status_code=400, detail=f"Invalid date: {err}")
-    member_ids = [int(x) for x in request.form.getlist("member_ids") if x.strip().isdigit()]
+    member_ids = member_ids or []
     cid = int(crew_id) if crew_id and str(crew_id).strip() else None
     with get_connection() as conn:
         conn.execute(
@@ -880,12 +880,12 @@ def edit_job_form(job_id: int, request: Request) -> HTMLResponse:
 @app.post("/jobs/{job_id}/edit")
 def update_job(
     job_id: int,
-    request: Request,
     client_id: int = Form(...),
     description: str = Form(...),
     scheduled_date: str = Form(...),
     crew: str = Form(""),
     crew_id: Optional[int] = Form(None),
+    member_ids: Optional[List[int]] = Form(None),
     estimated_hours: float = Form(...),
     estimated_cost: float = Form(...),
 ) -> RedirectResponse:
@@ -897,7 +897,7 @@ def update_job(
         dt = datetime.fromisoformat(scheduled_date)
     except ValueError as err:
         raise HTTPException(status_code=400, detail=f"Invalid date: {err}")
-    member_ids = [int(x) for x in request.form.getlist("member_ids") if x.strip().isdigit()]
+    member_ids = member_ids or []
     cid = int(crew_id) if crew_id and str(crew_id).strip() else None
     with get_connection() as conn:
         conn.execute(
@@ -1167,4 +1167,4 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5050"))
     host = "0.0.0.0"  # listen on all interfaces so browser can connect
     print(f"\n  Landscaping App:  http://localhost:{port}/\n")
-    uvicorn.run("app:app", host=host, port=port, reload=True)
+    uvicorn.run("app:app", host=host, port=port, reload=False)

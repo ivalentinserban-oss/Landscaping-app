@@ -19,8 +19,13 @@
             <tr>
                 <td><a href="/crews/{{ crew.id }}">{{ crew.name }}</a></td>
                 <td>
-                    <a href="/crews/{{ crew.id }}" class="btn btn-sm btn-outline-secondary">View</a>
-                    <a href="/crews/{{ crew.id }}/edit" class="btn btn-sm btn-outline-primary ms-2">Edit</a>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <a href="/crews/{{ crew.id }}" class="btn btn-sm btn-outline-secondary">View</a>
+                        <a href="/crews/{{ crew.id }}/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <form method="post" action="/crews/{{ crew.id }}/delete" class="mb-0" onsubmit="return confirm('Delete this crew?');">
+                            <button type="submit" class="btn btn-sm btn-secondary">Delete</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
