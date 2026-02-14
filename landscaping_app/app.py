@@ -26,7 +26,7 @@ import sqlite3
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, FastAPI, Form, HTTPException, Request
+from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -205,35 +205,38 @@ init_db()
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 templates.env.globals["google_maps_api_key"] = GOOGLE_MAPS_API_KEY
 
-# Router for crews and members so their list routes are registered first and always work
-team_router = APIRouter()
-
-
-def _list_crews(request: Request) -> HTMLResponse:
+# Crews list supports both /crews and /crews-list.
+@app.get("/crews", response_class=HTMLResponse)
+@app.get("/crews/", response_class=HTMLResponse)
+@app.get("/crews-list", response_class=HTMLResponse, include_in_schema=False)
+@app.get("/crews-list/", response_class=HTMLResponse, include_in_schema=False)
+def list_crews(request: Request) -> HTMLResponse:
     with get_connection() as conn:
         crews = conn.execute("SELECT * FROM crews ORDER BY name").fetchall()
     return templates.TemplateResponse("crews.html", {"request": request, "crews": crews})
 
 
-def _list_members(request: Request) -> HTMLResponse:
+# Members list supports both /members and /members-list.
+@app.get("/members", response_class=HTMLResponse)
+@app.get("/members/", response_class=HTMLResponse)
+@app.get("/members-list", response_class=HTMLResponse, include_in_schema=False)
+@app.get("/members-list/", response_class=HTMLResponse, include_in_schema=False)
+def list_members(request: Request) -> HTMLResponse:
     with get_connection() as conn:
         members = conn.execute("SELECT * FROM members ORDER BY name").fetchall()
     return templates.TemplateResponse("members.html", {"request": request, "members": members})
 
 
-@team_router.get("/crews", response_class=HTMLResponse)
-@team_router.get("/crews/", response_class=HTMLResponse)
-def list_crews(request: Request) -> HTMLResponse:
-    return _list_crews(request)
+@app.get("/team/crews", include_in_schema=False)
+@app.get("/team/crews/", include_in_schema=False)
+def redirect_team_crews() -> RedirectResponse:
+    return RedirectResponse(url="/crews", status_code=302)
 
 
-@team_router.get("/members", response_class=HTMLResponse)
-@team_router.get("/members/", response_class=HTMLResponse)
-def list_members(request: Request) -> HTMLResponse:
-    return _list_members(request)
-
-
-app.include_router(team_router)
+@app.get("/team/members", include_in_schema=False)
+@app.get("/team/members/", include_in_schema=False)
+def redirect_team_members() -> RedirectResponse:
+    return RedirectResponse(url="/members", status_code=302)
 
 
 @app.get("/reports", response_class=HTMLResponse)

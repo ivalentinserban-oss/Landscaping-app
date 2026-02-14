@@ -1,4 +1,4 @@
-# Run the Landscaping App on http://127.0.0.1:8000
+# Run the Landscaping App on http://127.0.0.1:5050
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 

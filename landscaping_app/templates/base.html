@@ -504,12 +504,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.url.path.startswith('/crews') %}active{% endif %}" href="/crews">
+                        <a class="nav-link {% if request.url.path == '/crews-list' or request.url.path.startswith('/crews') %}active{% endif %}" href="/crews">
                             <span>Crews</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.url.path.startswith('/members') %}active{% endif %}" href="/members">
+                        <a class="nav-link {% if request.url.path == '/members-list' or request.url.path.startswith('/members') %}active{% endif %}" href="/members">
                             <span>Members</span>
                         </a>
                     </li>

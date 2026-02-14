@@ -11,7 +11,7 @@ python app.py
 
 Then open **http://localhost:5050** (or the port shown in the terminal).
 
-See [HOW_TO_RUN.txt](landscaping_app/HOW_TO_RUN.txt) for more options.
+See [HOW_TO_RUN.txt](HOW_TO_RUN.txt) for more options.
 
 ## Stack
 
